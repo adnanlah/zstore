@@ -1,0 +1,13 @@
+singleQuote: true
+semi: true
+printWidth: 100
+trailingComma: none
+importOrder:
+  - '^@core/(.*)$'
+  - '^@server/(.*)$'
+  - '^@ui/(.*)$'
+  - '^[./]'
+importOrderSeparation: true
+importOrderSortSpecifiers: true
+plugins:
+  - '@trivago/prettier-plugin-sort-imports'
