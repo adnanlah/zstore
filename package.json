@@ -2,7 +2,7 @@
   "name": "zstore",
   "version": "0.1.0",
   "description": "JSON store",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": "Adnan Lahrech",
   "license": "MIT",
   "type": "module",

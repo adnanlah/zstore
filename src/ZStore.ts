@@ -2,8 +2,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { AnyZodObject, z } from 'zod';
 
-import { getDefaultValueFromSchema, stringifyObject } from './helpers.js';
-import { OptionsType, UpdateFunctionType } from './types.js';
+import { getDefaultValueFromSchema, stringifyObject } from './helpers';
+import { OptionsType, UpdateFunctionType } from './types';
 
 class ZStore<T extends AnyZodObject, I extends AnyZodObject[]> {
   readonly schema: T;
@@ -54,7 +54,8 @@ class ZStore<T extends AnyZodObject, I extends AnyZodObject[]> {
     if ('version' in rawData && typeof rawData.version === 'number') {
       if (migrations)
         return migrations(rawData as z.infer<I[number]>); // run migrations and return the new state
-      else return this.schema.parse(rawData); // throws an error if the data is not of type T
+      // else return this.schema.parse(rawData); // throws an error if the data is not of type T
+      else return rawData;
     }
 
     throw new Error('Invalid store version');

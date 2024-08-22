@@ -1,3 +1,3 @@
-import ZStore from './ZStore.js';
+import ZStore from './ZStore';
 
 export { ZStore };
