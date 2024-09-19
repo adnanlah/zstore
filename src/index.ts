@@ -1,3 +1,3 @@
 import ZStore from './ZStore';
 
-export { ZStore };
+export default ZStore;
