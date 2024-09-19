@@ -4,7 +4,7 @@ import { existsSync, readFileSync, rmSync } from 'fs';
 import { beforeEach, describe } from 'mocha';
 import { join } from 'path';
 
-import { ZStore } from '../src/index.js';
+import ZStore from '../src/index.js';
 import { STORE_PATH, migrateUser } from './helpers.js';
 import { UserTypeV2, userSchemaV1, userSchemaV2 } from './schemas.js';
 

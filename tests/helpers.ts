@@ -1,6 +1,5 @@
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { z } from 'zod';
 
 import { UserType, UserTypeV1, UserTypeV2 } from './schemas.js';
 
