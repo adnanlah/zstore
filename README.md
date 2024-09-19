@@ -6,7 +6,7 @@ Simple data persistence for your Electron app or module - Save and load user set
 
 ```ts
 import { z } from 'zod';
-import { ZStore } from 'zstore';
+import ZStore from 'zstore';
 
 // version is mandantory
 // default values are also mandatory
