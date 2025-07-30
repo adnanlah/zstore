@@ -2,7 +2,6 @@
   "name": "zstore",
   "version": "0.1.0",
   "description": "JSON store",
-  "main": "dist/index.js",
   "author": "Adnan Lahrech",
   "license": "MIT",
   "type": "module",
@@ -25,10 +24,10 @@
     "ts-node": "^10.9.2",
     "tsup": "^8.2.4",
     "tsx": "^4.17.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.2"
   },
   "dependencies": {
-    "zod": "^3.23.8"
+    "zod": "^3.25.67"
   },
   "exports": {
     ".": {
@@ -53,5 +52,6 @@
   },
   "mocha": {
     "useTsNode": true
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
