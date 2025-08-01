@@ -1,31 +1,22 @@
 import { assert } from 'chai';
-import chalk from 'chalk';
-import { existsSync, readFileSync, rmSync } from 'fs';
-import { beforeEach, describe } from 'mocha';
+import { existsSync, readFileSync } from 'fs';
+import { describe } from 'mocha';
 import { join } from 'path';
 
 import ZStore from '../src/index.js';
-import { STORE_PATH, migrateUser } from './helpers.js';
+import { STORE_PATH, cleanFolder, generateFileName, migrateUser } from './helpers.js';
 import { userSchemaV1, userSchemaV2 } from './schemas.js';
 
-const name = 'user';
-const filePath = join(STORE_PATH, `${name}.json`);
-
-beforeEach(function () {
-  try {
-    rmSync(STORE_PATH, { recursive: true });
-  } catch (err) {
-    console.error(chalk.redBright('Error while deleting store directory', err));
-  }
-});
+cleanFolder();
 
 describe('> Initialize a new store', function () {
   describe('> Create a new store file if it does not exist', function () {
     it('should create a .json file with the name passed in the options', function () {
+      const { filename, storeName } = generateFileName('1');
       new ZStore({
-        allSchemas: [userSchemaV1] as const,
+        schemas: [userSchemaV1] as const,
         path: STORE_PATH,
-        name,
+        name: storeName,
         defaults: {
           age: 30,
           name: 'Adnan',
@@ -33,16 +24,17 @@ describe('> Initialize a new store', function () {
         }
       });
 
-      const doesFileExist = existsSync(filePath);
+      const doesFileExist = existsSync(join(STORE_PATH, filename));
 
       assert.isTrue(doesFileExist);
     });
 
     it('should create a .json file in /store directory with schema default values', function () {
+      const { filename, storeName } = generateFileName('2');
       new ZStore({
-        allSchemas: [userSchemaV1] as const,
+        schemas: [userSchemaV1] as const,
         path: STORE_PATH,
-        name: 'user',
+        name: storeName,
         defaults: {
           age: 30,
           name: 'Adnan',
@@ -50,7 +42,7 @@ describe('> Initialize a new store', function () {
         }
       });
 
-      const file = readFileSync(filePath, 'utf-8');
+      const file = readFileSync(join(STORE_PATH, filename), 'utf-8');
 
       const obj = JSON.parse(file);
 
@@ -62,10 +54,11 @@ describe('> Initialize a new store', function () {
     });
 
     it('should create a .json file in /store directory with user default values', function () {
+      const { filename, storeName } = generateFileName('3');
       new ZStore({
-        allSchemas: [userSchemaV1] as const,
+        schemas: [userSchemaV1] as const,
         path: STORE_PATH,
-        name: 'user',
+        name: storeName,
         defaults: {
           storeVersion: 1,
           name: 'John Doe',
@@ -73,7 +66,7 @@ describe('> Initialize a new store', function () {
         }
       });
 
-      const file = readFileSync(filePath, 'utf-8');
+      const file = readFileSync(join(STORE_PATH, filename), 'utf-8');
 
       const obj = JSON.parse(file);
 
@@ -87,10 +80,11 @@ describe('> Initialize a new store', function () {
 
   describe('> Load the store from the file if it exists', function () {
     it('should load the store', function () {
+      const { storeName } = generateFileName('4');
       const store = new ZStore({
-        allSchemas: [userSchemaV1] as const,
+        schemas: [userSchemaV1] as const,
         path: STORE_PATH,
-        name: 'user',
+        name: storeName,
         defaults: {
           age: 30,
           name: 'Adnan',
@@ -103,9 +97,9 @@ describe('> Initialize a new store', function () {
       });
 
       const store2 = new ZStore({
-        allSchemas: [userSchemaV1] as const,
+        schemas: [userSchemaV1] as const,
         path: STORE_PATH,
-        name: 'user',
+        name: storeName,
         defaults: {
           age: 30,
           name: 'Adnan',
@@ -117,10 +111,13 @@ describe('> Initialize a new store', function () {
     });
 
     it('should load the store and run migrations', function () {
+      const { filename, storeName } = generateFileName('5-1');
+      const { storeName: storeName2 } = generateFileName('5-2');
+
       const store1 = new ZStore({
-        allSchemas: [userSchemaV1] as const,
+        schemas: [userSchemaV1] as const,
         path: STORE_PATH,
-        name: 'user',
+        name: storeName,
         defaults: {
           age: 30,
           name: 'Adnan',
@@ -128,7 +125,7 @@ describe('> Initialize a new store', function () {
         }
       });
 
-      const file = readFileSync(filePath, 'utf-8');
+      const file = readFileSync(join(STORE_PATH, filename), 'utf-8');
 
       const obj = JSON.parse(file);
 
@@ -139,9 +136,9 @@ describe('> Initialize a new store', function () {
       assert.equal(result.data?.age, 30);
 
       const store2 = new ZStore({
-        allSchemas: [userSchemaV1, userSchemaV2] as const,
+        schemas: [userSchemaV1, userSchemaV2] as const,
         path: STORE_PATH,
-        name: 'user',
+        name: storeName2,
         migrations: (s) => {
           // return migrateUser(s);
           if (s.storeVersion === 1) {
@@ -151,11 +148,7 @@ describe('> Initialize a new store', function () {
               age: 12
             };
           } else {
-            return {
-              storeVersion: 2 as const,
-              email: 'test@test.com',
-              age: 12
-            };
+            return s;
           }
         },
         defaults: {
@@ -174,10 +167,11 @@ describe('> Initialize a new store', function () {
 
 describe('> Update the store', function () {
   it('should update the store', function () {
+    const { filename, storeName } = generateFileName('6');
     const store = new ZStore({
-      allSchemas: [userSchemaV1] as const,
+      schemas: [userSchemaV1] as const,
       path: STORE_PATH,
-      name: 'user',
+      name: storeName,
       defaults: {
         age: 30,
         name: 'Adnan',
@@ -189,7 +183,7 @@ describe('> Update the store', function () {
       name: 'John Doe'
     });
 
-    const file = readFileSync(filePath, 'utf-8');
+    const file = readFileSync(join(STORE_PATH, filename), 'utf-8');
 
     const obj = JSON.parse(file);
 

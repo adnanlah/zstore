@@ -2,26 +2,25 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { z } from 'zod';
 
-import { getDefaultValueFromSchema, stringifyObject } from './helpers.js';
+import { stringifyObject } from './helpers.js';
 import { Last, OptionsType, UpdateFunctionType, ZodWithVersion } from './types.js';
 
 class ZStore<T extends ZodWithVersion[], I extends Last<T>> {
-  readonly schema: ZodWithVersion;
+  readonly schema: I;
   readonly name: string;
   readonly path: string;
   readonly defaultValues: z.TypeOf<I>;
   private _store: z.TypeOf<I>;
 
   constructor(opts: OptionsType<T, I>) {
-    this.schema = opts.allSchemas[opts.allSchemas.length - 1];
+    this.schema = opts.schemas[opts.schemas.length - 1] as I;
     this.name = opts.name;
 
     const BASE_PATH = opts.path ?? './';
 
     this.path = path.join(BASE_PATH, opts.name + '.json');
 
-    if (opts.defaults) this.defaultValues = Object.assign({}, opts.defaults);
-    else this.defaultValues = getDefaultValueFromSchema(this.schema);
+    this.defaultValues = Object.assign({}, opts.defaults);
 
     this._store = this.defaultValues;
 

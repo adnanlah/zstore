@@ -1,3 +1,5 @@
+import chalk from 'chalk';
+import { rmSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -32,3 +34,19 @@ export function migrateUser(user: UserType): UserTypeV2 {
   }
   return user;
 }
+
+export const generateFileName = (a: string) => {
+  const s = a + `-${Date.now()}`;
+  return {
+    storeName: s,
+    filename: s + '.json'
+  };
+};
+
+export const cleanFolder = () => {
+  try {
+    rmSync(STORE_PATH, { recursive: true });
+  } catch (err) {
+    console.error(chalk.redBright('Error while deleting store directory', err));
+  }
+};

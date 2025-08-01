@@ -18,7 +18,7 @@ const userSchemaV1 = z.object({
 
 const userStore = new ZStore({
   schema: userSchemaV1,
-  allSchemas: [userSchemaV1],
+  schemas: [userSchemaV1],
   name: 'user'
 });
 

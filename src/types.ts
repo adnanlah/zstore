@@ -4,7 +4,7 @@ export type ZodWithVersion = ZodObject<{ storeVersion: ZodLiteral<number> }>;
 export type Last<T extends any[]> = T extends [...infer _, infer L] ? L : never;
 
 export type OptionsType<T extends ZodWithVersion[], I extends Last<T>> = {
-  allSchemas: T;
+  schemas: T;
   name: string;
   defaults: z.infer<I>;
   path?: string;
