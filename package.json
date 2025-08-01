@@ -24,10 +24,13 @@
     "ts-node": "^10.9.2",
     "tsup": "^8.2.4",
     "tsx": "^4.17.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
-    "zod": "^3.25.67"
+    "zod": "^4.0.14"
+  },
+  "peerDependencies": {
+    "zod": ">=4.0.0"
   },
   "exports": {
     ".": {
@@ -48,6 +51,9 @@
     ],
     "entry": [
       "src/**/*.ts"
+    ],
+    "external": [
+      "zod"
     ]
   },
   "mocha": {
