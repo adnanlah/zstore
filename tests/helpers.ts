@@ -9,16 +9,16 @@ const __dirname = dirname(__filename);
 export const STORE_PATH = join(__dirname, './store');
 
 function isUserTypeV1(user: UserType): user is UserTypeV1 {
-  return user.version === 1;
+  return user.storeVersion === 1;
 }
 
 function isUserTypeV2(user: UserType): user is UserTypeV2 {
-  return user.version === 2;
+  return user.storeVersion === 2;
 }
 
 function migrateV1ToV2(user: UserTypeV1): UserTypeV2 {
   return {
-    version: 2,
+    storeVersion: 2,
     email: '06123455676',
     age: 12
   };

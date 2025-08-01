@@ -3,26 +3,27 @@ import path from 'path';
 import { z } from 'zod';
 
 import { getDefaultValueFromSchema, stringifyObject } from './helpers.js';
-import { OptionsType, UpdateFunctionType, ZodWithVersion } from './types.js';
+import { Last, OptionsType, UpdateFunctionType, ZodWithVersion } from './types.js';
 
-class ZStore<T extends ZodWithVersion, I extends ZodWithVersion[]> {
-  readonly schema: T;
+class ZStore<T extends ZodWithVersion[], I extends Last<T>> {
+  readonly schema: ZodWithVersion;
   readonly name: string;
   readonly path: string;
-  readonly defaultValues: z.infer<T>;
-  private _store: z.infer<T> = {
-    version: 1 // required by ZodWithVersion
-  };
+  readonly defaultValues: z.TypeOf<I>;
+  private _store: z.TypeOf<I>;
 
   constructor(opts: OptionsType<T, I>) {
-    if (opts.path) this.path = path.join(opts.path, opts.name + '.json');
-    else this.path = path.join('.', opts.name + '.json');
+    this.schema = opts.allSchemas[opts.allSchemas.length - 1];
+    this.name = opts.name;
+
+    const BASE_PATH = opts.path ?? './';
+
+    this.path = path.join(BASE_PATH, opts.name + '.json');
 
     if (opts.defaults) this.defaultValues = Object.assign({}, opts.defaults);
-    else this.defaultValues = getDefaultValueFromSchema(opts.schema);
+    else this.defaultValues = getDefaultValueFromSchema(this.schema);
 
-    this.schema = opts.schema;
-    this.name = opts.name;
+    this._store = this.defaultValues;
 
     try {
       const raw = readFileSync(this.path, 'utf-8');
@@ -47,15 +48,15 @@ class ZStore<T extends ZodWithVersion, I extends ZodWithVersion[]> {
 
   private _migrateOrParseStore(
     rawData: unknown,
-    migrations?: (store: z.infer<I[number]>) => z.infer<T>
-  ): z.infer<T> {
+    migrations?: (store: z.infer<T[number]>) => z.infer<I>
+  ): z.infer<I> {
     if (typeof rawData !== 'object' || rawData === null) {
       throw new Error('Invalid config format');
     }
 
-    if ('version' in rawData && typeof rawData.version === 'number') {
+    if ('storeVersion' in rawData && typeof rawData.storeVersion === 'number') {
       if (migrations)
-        return migrations(rawData as z.infer<I[number]>); // run migrations and return the new state
+        return migrations(rawData as z.infer<T[number]>); // run migrations and return the new state
       else return this.schema.parse(rawData); // throws an error if the data is not of type T
       // else return rawData;
     }
@@ -63,11 +64,11 @@ class ZStore<T extends ZodWithVersion, I extends ZodWithVersion[]> {
     throw new Error('Invalid store version');
   }
 
-  private _getStore(): z.infer<T> {
+  private _getStore(): z.infer<I> {
     return Object.assign({}, this._store);
   }
 
-  private _setStore(s: z.infer<T>) {
+  private _setStore(s: z.infer<I>) {
     const string = stringifyObject(s);
     mkdirSync(path.dirname(this.path), { recursive: true });
     writeFileSync(this.path, string, { encoding: 'utf-8' });
@@ -87,7 +88,7 @@ class ZStore<T extends ZodWithVersion, I extends ZodWithVersion[]> {
    * const currentState = myStore.store;
    * console.log(currentState);
    */
-  get store(): z.infer<T> {
+  get store(): z.infer<I> {
     return this._getStore();
   }
 
@@ -113,21 +114,21 @@ class ZStore<T extends ZodWithVersion, I extends ZodWithVersion[]> {
    * // Example 2: Updating state with a function
    * set((currentState) => ({ ...currentState, key: 'newValue' }));
    *
-   * @param {Omit<Partial<z.infer<T>>, 'version'> | UpdateFunctionType<Omit<z.infer<T>, 'version'>>} update
+   * @param {Omit<Partial<z.infer<I>>, 'version'> | UpdateFunctionType<Omit<z.infer<I>, 'version'>>} update
    *    - Either an object containing a partial update or a function that returns a new state.
    */
-  set(update: Omit<Partial<z.infer<T>>, 'version'>): void;
-  set(update: UpdateFunctionType<Omit<z.infer<T>, 'version'>>): void;
+  set(update: Omit<Partial<z.infer<I>>, 'version'>): void;
+  set(update: UpdateFunctionType<Omit<z.infer<I>, 'version'>>): void;
   set(
-    update: Omit<Partial<z.infer<T>>, 'version'> | UpdateFunctionType<Omit<z.infer<T>, 'version'>>
+    update: Omit<Partial<z.infer<I>>, 'version'> | UpdateFunctionType<Omit<z.infer<I>, 'version'>>
   ): void {
     if (typeof update === 'object') {
       // const currentState = this.schema.parse(update);
       this._setStore(Object.assign(this._store, update));
     } else {
       const data = readFileSync(this.path, 'utf-8');
-      const currentState = this.schema.parse(JSON.parse(data)) as z.infer<T>;
-      const newState = update(currentState) as z.infer<T>;
+      const currentState = this.schema.parse(JSON.parse(data)) as z.infer<I>;
+      const newState = update(currentState) as z.infer<I>;
       this._setStore(newState);
     }
   }

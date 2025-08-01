@@ -6,7 +6,10 @@ import { join } from 'path';
 
 import ZStore from '../src/index.js';
 import { STORE_PATH, migrateUser } from './helpers.js';
-import { UserTypeV2, userSchemaV1, userSchemaV2 } from './schemas.js';
+import { userSchemaV1, userSchemaV2 } from './schemas.js';
+
+const name = 'user';
+const filePath = join(STORE_PATH, `${name}.json`);
 
 beforeEach(function () {
   try {
@@ -19,38 +22,35 @@ beforeEach(function () {
 describe('> Initialize a new store', function () {
   describe('> Create a new store file if it does not exist', function () {
     it('should create a .json file with the name passed in the options', function () {
-      const name = 'user';
       new ZStore({
-        schema: userSchemaV1,
-        allSchemas: [userSchemaV1],
+        allSchemas: [userSchemaV1] as const,
         path: STORE_PATH,
         name,
         defaults: {
           age: 30,
           name: 'Adnan',
-          version: 1
+          storeVersion: 1
         }
       });
 
-      const doesFileExist = existsSync(join(STORE_PATH, `${name}.json`));
+      const doesFileExist = existsSync(filePath);
 
       assert.isTrue(doesFileExist);
     });
 
     it('should create a .json file in /store directory with schema default values', function () {
       new ZStore({
-        schema: userSchemaV1,
-        allSchemas: [userSchemaV1],
+        allSchemas: [userSchemaV1] as const,
         path: STORE_PATH,
         name: 'user',
         defaults: {
           age: 30,
           name: 'Adnan',
-          version: 1
+          storeVersion: 1
         }
       });
 
-      const file = readFileSync(join(STORE_PATH, 'user.json'), 'utf-8');
+      const file = readFileSync(filePath, 'utf-8');
 
       const obj = JSON.parse(file);
 
@@ -63,18 +63,17 @@ describe('> Initialize a new store', function () {
 
     it('should create a .json file in /store directory with user default values', function () {
       new ZStore({
-        schema: userSchemaV1,
-        allSchemas: [userSchemaV1],
+        allSchemas: [userSchemaV1] as const,
         path: STORE_PATH,
         name: 'user',
         defaults: {
-          version: 1,
+          storeVersion: 1,
           name: 'John Doe',
           age: 20
         }
       });
 
-      const file = readFileSync(join(STORE_PATH, 'user.json'), 'utf-8');
+      const file = readFileSync(filePath, 'utf-8');
 
       const obj = JSON.parse(file);
 
@@ -89,14 +88,13 @@ describe('> Initialize a new store', function () {
   describe('> Load the store from the file if it exists', function () {
     it('should load the store', function () {
       const store = new ZStore({
-        schema: userSchemaV1,
-        allSchemas: [userSchemaV1],
+        allSchemas: [userSchemaV1] as const,
         path: STORE_PATH,
         name: 'user',
         defaults: {
           age: 30,
           name: 'Adnan',
-          version: 1
+          storeVersion: 1
         }
       });
 
@@ -105,14 +103,13 @@ describe('> Initialize a new store', function () {
       });
 
       const store2 = new ZStore({
-        schema: userSchemaV1,
-        allSchemas: [userSchemaV1],
+        allSchemas: [userSchemaV1] as const,
         path: STORE_PATH,
         name: 'user',
         defaults: {
           age: 30,
           name: 'Adnan',
-          version: 1
+          storeVersion: 1
         }
       });
 
@@ -121,18 +118,17 @@ describe('> Initialize a new store', function () {
 
     it('should load the store and run migrations', function () {
       const store1 = new ZStore({
-        schema: userSchemaV1,
-        allSchemas: [userSchemaV1],
+        allSchemas: [userSchemaV1] as const,
         path: STORE_PATH,
         name: 'user',
         defaults: {
           age: 30,
           name: 'Adnan',
-          version: 1
+          storeVersion: 1
         }
       });
 
-      const file = readFileSync(join(STORE_PATH, 'user.json'), 'utf-8');
+      const file = readFileSync(filePath, 'utf-8');
 
       const obj = JSON.parse(file);
 
@@ -143,21 +139,20 @@ describe('> Initialize a new store', function () {
       assert.equal(result.data?.age, 30);
 
       const store2 = new ZStore({
-        schema: userSchemaV2,
-        allSchemas: [userSchemaV1, userSchemaV2],
+        allSchemas: [userSchemaV1, userSchemaV2] as const,
         path: STORE_PATH,
         name: 'user',
         migrations: (s) => {
           // return migrateUser(s);
-          if (s.version === 1) {
+          if (s.storeVersion === 1) {
             return {
-              version: 2 as const,
+              storeVersion: 2 as const,
               email: 'test@test.com',
               age: 12
             };
           } else {
             return {
-              version: 2 as const,
+              storeVersion: 2 as const,
               email: 'test@test.com',
               age: 12
             };
@@ -166,11 +161,11 @@ describe('> Initialize a new store', function () {
         defaults: {
           age: 30,
           email: 'Adnan',
-          version: 2
+          storeVersion: 2
         }
       });
 
-      assert.equal(store2.store?.version, 2);
+      assert.equal(store2.store?.storeVersion, 2);
       assert.isString(store2.store?.email);
       assert.isNotTrue(Object.keys(store2.store).includes('name'));
     });
@@ -180,14 +175,13 @@ describe('> Initialize a new store', function () {
 describe('> Update the store', function () {
   it('should update the store', function () {
     const store = new ZStore({
-      schema: userSchemaV1,
-      allSchemas: [userSchemaV1],
+      allSchemas: [userSchemaV1] as const,
       path: STORE_PATH,
       name: 'user',
       defaults: {
         age: 30,
         name: 'Adnan',
-        version: 1
+        storeVersion: 1
       }
     });
 
@@ -195,7 +189,7 @@ describe('> Update the store', function () {
       name: 'John Doe'
     });
 
-    const file = readFileSync(join(STORE_PATH, 'user.json'), 'utf-8');
+    const file = readFileSync(filePath, 'utf-8');
 
     const obj = JSON.parse(file);
 

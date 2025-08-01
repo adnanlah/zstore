@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
 export const userSchemaV1 = z.object({
-  version: z.literal(1),
+  storeVersion: z.literal(1),
   name: z.string(),
   age: z.number()
 });
 
 export const userSchemaV2 = z.object({
-  version: z.literal(2),
+  storeVersion: z.literal(2),
   email: z.string(),
   age: z.number()
 });
