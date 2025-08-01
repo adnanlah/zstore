@@ -24,7 +24,12 @@ describe('> Initialize a new store', function () {
         schema: userSchemaV1,
         allSchemas: [userSchemaV1],
         path: STORE_PATH,
-        name
+        name,
+        defaults: {
+          age: 30,
+          name: 'Adnan',
+          version: 1
+        }
       });
 
       const doesFileExist = existsSync(join(STORE_PATH, `${name}.json`));
@@ -37,7 +42,12 @@ describe('> Initialize a new store', function () {
         schema: userSchemaV1,
         allSchemas: [userSchemaV1],
         path: STORE_PATH,
-        name: 'user'
+        name: 'user',
+        defaults: {
+          age: 30,
+          name: 'Adnan',
+          version: 1
+        }
       });
 
       const file = readFileSync(join(STORE_PATH, 'user.json'), 'utf-8');
@@ -58,6 +68,7 @@ describe('> Initialize a new store', function () {
         path: STORE_PATH,
         name: 'user',
         defaults: {
+          version: 1,
           name: 'John Doe',
           age: 20
         }
@@ -81,7 +92,12 @@ describe('> Initialize a new store', function () {
         schema: userSchemaV1,
         allSchemas: [userSchemaV1],
         path: STORE_PATH,
-        name: 'user'
+        name: 'user',
+        defaults: {
+          age: 30,
+          name: 'Adnan',
+          version: 1
+        }
       });
 
       store.set({
@@ -92,7 +108,12 @@ describe('> Initialize a new store', function () {
         schema: userSchemaV1,
         allSchemas: [userSchemaV1],
         path: STORE_PATH,
-        name: 'user'
+        name: 'user',
+        defaults: {
+          age: 30,
+          name: 'Adnan',
+          version: 1
+        }
       });
 
       assert.equal(store2.store.name, 'John Doe');
@@ -103,7 +124,12 @@ describe('> Initialize a new store', function () {
         schema: userSchemaV1,
         allSchemas: [userSchemaV1],
         path: STORE_PATH,
-        name: 'user'
+        name: 'user',
+        defaults: {
+          age: 30,
+          name: 'Adnan',
+          version: 1
+        }
       });
 
       const file = readFileSync(join(STORE_PATH, 'user.json'), 'utf-8');
@@ -136,6 +162,11 @@ describe('> Initialize a new store', function () {
               age: 12
             };
           }
+        },
+        defaults: {
+          age: 30,
+          email: 'Adnan',
+          version: 2
         }
       });
 
@@ -152,7 +183,12 @@ describe('> Update the store', function () {
       schema: userSchemaV1,
       allSchemas: [userSchemaV1],
       path: STORE_PATH,
-      name: 'user'
+      name: 'user',
+      defaults: {
+        age: 30,
+        name: 'Adnan',
+        version: 1
+      }
     });
 
     store.set({

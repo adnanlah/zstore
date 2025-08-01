@@ -1,16 +1,18 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { type AnyZodObject, z } from 'zod';
+import { z } from 'zod';
 
 import { getDefaultValueFromSchema, stringifyObject } from './helpers.js';
-import { OptionsType, UpdateFunctionType } from './types.js';
+import { OptionsType, UpdateFunctionType, ZodWithVersion } from './types.js';
 
-class ZStore<T extends AnyZodObject, I extends AnyZodObject[]> {
+class ZStore<T extends ZodWithVersion, I extends ZodWithVersion[]> {
   readonly schema: T;
   readonly name: string;
   readonly path: string;
-  readonly defaultValues: Partial<z.infer<T>>;
-  private _store: z.infer<T> = {};
+  readonly defaultValues: z.infer<T>;
+  private _store: z.infer<T> = {
+    version: 1 // required by ZodWithVersion
+  };
 
   constructor(opts: OptionsType<T, I>) {
     if (opts.path) this.path = path.join(opts.path, opts.name + '.json');
@@ -54,8 +56,8 @@ class ZStore<T extends AnyZodObject, I extends AnyZodObject[]> {
     if ('version' in rawData && typeof rawData.version === 'number') {
       if (migrations)
         return migrations(rawData as z.infer<I[number]>); // run migrations and return the new state
-      // else return this.schema.parse(rawData); // throws an error if the data is not of type T
-      else return rawData;
+      else return this.schema.parse(rawData); // throws an error if the data is not of type T
+      // else return rawData;
     }
 
     throw new Error('Invalid store version');
@@ -65,7 +67,7 @@ class ZStore<T extends AnyZodObject, I extends AnyZodObject[]> {
     return Object.assign({}, this._store);
   }
 
-  private _setStore(s: z.TypeOf<T>) {
+  private _setStore(s: z.infer<T>) {
     const string = stringifyObject(s);
     mkdirSync(path.dirname(this.path), { recursive: true });
     writeFileSync(this.path, string, { encoding: 'utf-8' });

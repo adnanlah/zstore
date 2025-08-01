@@ -1,11 +1,13 @@
-import { AnyZodObject, z } from 'zod';
+import { ZodLiteral, ZodObject, z } from 'zod';
 
-export type OptionsType<T extends AnyZodObject, I extends AnyZodObject[]> = {
+export type ZodWithVersion = ZodObject<{ version: ZodLiteral<number> }>;
+
+export type OptionsType<T extends ZodWithVersion, I extends ZodWithVersion[]> = {
   schema: T;
   allSchemas: I;
   name: string;
   path?: string;
-  defaults?: Partial<z.infer<T>>;
+  defaults: z.infer<T>;
   migrations?: (store: z.infer<I[number]>) => z.infer<T>;
 };
 
